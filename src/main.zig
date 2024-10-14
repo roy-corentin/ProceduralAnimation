@@ -14,13 +14,17 @@ pub fn main() !void {
 
     while (!rl.windowShouldClose()) {
         rl.beginDrawing();
-        defer rl.endDrawing();
-        const fps: [:0]const u8 = try i32ToString(rl.getFPS());
-        defer allocator.free(fps);
-
         rl.clearBackground(rl.Color.white);
-        rl.drawText(fps, @divTrunc(rl.getScreenWidth(), 2), @divTrunc(rl.getScreenHeight(), 2), 24, rl.Color.red);
+        try drawFps(allocator);
+        rl.endDrawing();
     }
+}
+
+pub fn drawFps(allocator: std.mem.Allocator) !void {
+    const fps: [:0]const u8 = try i32ToString(rl.getFPS());
+    defer allocator.free(fps);
+
+    rl.drawText(fps, 10, 10, 24, rl.Color.green);
 }
 
 pub fn i32ToString(number: i32) ![:0]const u8 {
