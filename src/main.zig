@@ -4,7 +4,7 @@ const rl = @import("raylib");
 pub fn main() !void {
     const screenWidth = 800;
     const screenHeight = 450;
-    const allocator = std.heap.c_allocator;
+    var circlePosition: rl.Vector2 = .{ .x = 400, .y = 225 };
 
     rl.setTargetFPS(60);
     rl.setConfigFlags(rl.ConfigFlags{ .window_resizable = true });
@@ -15,38 +15,28 @@ pub fn main() !void {
     while (!rl.windowShouldClose()) {
         rl.beginDrawing();
         rl.clearBackground(rl.Color.white);
-        try drawFps(allocator);
+        rl.drawCircleLinesV(circlePosition, 30, rl.Color.red);
+        rl.drawFPS(10, 10);
+        updateCirclePosition(&circlePosition);
         rl.endDrawing();
     }
 }
 
-pub fn drawFps(allocator: std.mem.Allocator) !void {
-    const fps: [:0]const u8 = try i32ToString(rl.getFPS());
-    defer allocator.free(fps);
-
-    rl.drawText(fps, 10, 10, 24, rl.Color.green);
+pub fn updateCirclePosition(circlePosition: *rl.Vector2) void {
+    const mousePosition = rl.getMousePosition();
+    const directionVector = computeDirection(circlePosition.*, mousePosition);
+    const speed = 5;
+    circlePosition.x += directionVector.x * speed;
+    circlePosition.y += directionVector.y * speed;
 }
 
-pub fn i32ToString(number: i32) ![:0]const u8 {
-    var modulo: i32 = 1;
-    var size: u8 = 1;
-    var tmp = number;
-    const allocator = std.heap.c_allocator;
+pub fn computeDirection(pointA: rl.Vector2, pointB: rl.Vector2) rl.Vector2 {
+    const displacementVector = .{ .x = pointB.x - pointA.x, .y = pointB.y - pointA.y };
+    const magnitudeDeplacementVector = absoluteValue(displacementVector.x) + absoluteValue(displacementVector.y);
 
-    while (@divFloor(number, modulo) > 10) {
-        modulo *= 10;
-        size += 1;
-    }
+    return .{ .x = displacementVector.x / magnitudeDeplacementVector, .y = displacementVector.y / magnitudeDeplacementVector };
+}
 
-    var string: [:0]u8 = try allocator.allocSentinel(u8, size, 0);
-
-    while (size > 0) {
-        string[string.len - size] = @intCast(@divFloor(tmp, modulo) + 48);
-        size -= 1;
-        tmp = @mod(tmp, modulo);
-        modulo = @divFloor(modulo, 10);
-    }
-
-    std.debug.print("String: {s}, FPS: {d}\n", .{ string, number });
-    return string;
+pub fn absoluteValue(number: f32) f32 {
+    return if (number < 0) number * -1 else number;
 }
