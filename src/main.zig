@@ -55,8 +55,9 @@ fn drawCircle(circle: Circle) void {
 fn deplaceCircles(circles: []Circle) void {
     deplaceCircleInDirectionOfMouse(&circles[0]);
     for (1..circles.len) |i| {
-        if (distanceBetween(circles[i].position, circles[i - 1].position) <= circles[i].radius * 2)
-            return;
+        const distance = distanceBetween(circles[i].position, circles[i - 1].position);
+        if (distance < circles[i].radius * 2)
+            continue;
         const directionVector = computeDirectionVector(circles[i].position, circles[i - 1].position);
         updateCirclePosition(&circles[i], directionVector);
     }
