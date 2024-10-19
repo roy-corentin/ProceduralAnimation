@@ -22,7 +22,6 @@ pub fn main() !void {
         rl.drawFPS(10, 10);
         drawCircles(circles);
         deplaceCircles(circles);
-        // deplaceCircleInDirectionOfMouse(&headCircle);
         rl.endDrawing();
     }
 }
