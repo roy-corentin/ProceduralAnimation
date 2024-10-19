@@ -74,10 +74,11 @@ fn deplaceCircleInDirectionOfMouse(circle: *Circle) void {
 }
 
 fn computeDirectionVector(pointA: rl.Vector2, pointB: rl.Vector2) rl.Vector2 {
-    const displacementVector = .{ .x = pointB.x - pointA.x, .y = pointB.y - pointA.y };
-    const magnitudeDeplacementVector = absoluteValue(displacementVector.x) + absoluteValue(displacementVector.y);
+    const dx = pointB.x - pointA.x;
+    const dy = pointB.y - pointA.y;
+    const distance = @sqrt(dx * dx + dy * dy);
 
-    return .{ .x = displacementVector.x / magnitudeDeplacementVector, .y = displacementVector.y / magnitudeDeplacementVector };
+    return .{ .x = dx / distance, .y = dy / distance };
 }
 
 fn absoluteValue(number: f32) f32 {
@@ -85,7 +86,9 @@ fn absoluteValue(number: f32) f32 {
 }
 
 fn distanceBetween(pointA: rl.Vector2, pointB: rl.Vector2) f32 {
-    return absoluteValue(pointB.x - pointA.x) + absoluteValue(pointB.y - pointA.y);
+    const dx = pointB.x - pointA.x;
+    const dy = pointB.y - pointA.y;
+    return @sqrt(dx * dx + dy * dy);
 }
 
 fn updateCirclePosition(circle: *Circle, directionVector: rl.Vector2) void {
