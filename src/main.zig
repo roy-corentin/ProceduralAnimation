@@ -28,15 +28,18 @@ pub fn main() !void {
 
 fn generateCircles(number: usize) ![]Circle {
     const allocator = std.heap.c_allocator;
-    const x: f32 = 400.0;
+    var x: f32 = 400.0;
     const y: f32 = 225.0;
-    const radius: f32 = 25.0;
+    const baseRadius: f32 = 25.0;
 
     const head = try allocator.alloc(Circle, number);
+
     for (0..number) |i| {
-        const distance: f32 = radius * 2.0 * @as(f32, @floatFromInt(i));
-        head[i].position = .{ .x = x - distance, .y = y };
-        head[i].radius = radius;
+        const source = @min(@as(f32, @floatFromInt(@mod(i, @divFloor(number, 2)))), 1.0);
+        const circleRadius = baseRadius + source * 4.0;
+        head[i].position = .{ .x = x, .y = y };
+        head[i].radius = circleRadius;
+        x -= circleRadius * 2.0;
     }
     return head;
 }
@@ -56,7 +59,7 @@ fn deplaceCircles(circles: []Circle) void {
 
     for (1..circles.len) |i| {
         const distance = distanceBetween(circles[i].position, circles[i - 1].position);
-        if (distance < circles[i].radius * 2)
+        if (distance <= circles[i - 1].radius + circles[i].radius)
             continue;
 
         const directionVector = computeDirectionVector(circles[i].position, circles[i - 1].position);
@@ -68,7 +71,7 @@ fn deplaceCircleInDirectionOfMouse(circle: *Circle) void {
     const mousePosition = rl.getMousePosition();
 
     const distance = distanceBetween(circle.position, mousePosition);
-    if (distance < circle.radius * 2)
+    if (distance <= circle.radius)
         return;
 
     const directionVector = computeDirectionVector(circle.position, mousePosition);
