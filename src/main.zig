@@ -5,8 +5,8 @@ const Circle = struct { position: rl.Vector2, radius: f32 };
 
 pub fn main() !void {
     const allocator = std.heap.c_allocator;
-    const screenWidth = 800;
-    const screenHeight = 450;
+    const screenWidth = 1000;
+    const screenHeight = 900;
     const circles = try generateCircles(7);
     defer allocator.free(circles);
 
