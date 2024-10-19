@@ -54,23 +54,26 @@ fn drawCircle(circle: Circle) void {
 
 fn deplaceCircles(circles: []Circle) void {
     deplaceCircleInDirectionOfMouse(&circles[0]);
+
     for (1..circles.len) |i| {
         const distance = distanceBetween(circles[i].position, circles[i - 1].position);
         if (distance < circles[i].radius * 2)
             continue;
+
         const directionVector = computeDirectionVector(circles[i].position, circles[i - 1].position);
-        updateCirclePosition(&circles[i], directionVector);
+        updateCirclePosition(&circles[i], directionVector, distance);
     }
 }
 
 fn deplaceCircleInDirectionOfMouse(circle: *Circle) void {
     const mousePosition = rl.getMousePosition();
 
-    if (distanceBetween(circle.position, mousePosition) <= circle.radius)
+    const distance = distanceBetween(circle.position, mousePosition);
+    if (distance < circle.radius * 2)
         return;
 
     const directionVector = computeDirectionVector(circle.position, mousePosition);
-    updateCirclePosition(circle, directionVector);
+    updateCirclePosition(circle, directionVector, distance);
 }
 
 fn computeDirectionVector(pointA: rl.Vector2, pointB: rl.Vector2) rl.Vector2 {
@@ -91,9 +94,14 @@ fn distanceBetween(pointA: rl.Vector2, pointB: rl.Vector2) f32 {
     return @sqrt(dx * dx + dy * dy);
 }
 
-fn updateCirclePosition(circle: *Circle, directionVector: rl.Vector2) void {
-    const speed = 5;
+fn updateCirclePosition(circle: *Circle, directionVector: rl.Vector2, distance: f32) void {
+    const minSpeed = 1.0;
+    const maxSpeed = 8.0;
+    const speedFactor = 0.1;
 
-    circle.position.x += directionVector.x * speed;
-    circle.position.y += directionVector.y * speed;
+    const speed = @min(distance * speedFactor, maxSpeed);
+    const actualSpeed = @max(minSpeed, speed);
+
+    circle.position.x += directionVector.x * actualSpeed;
+    circle.position.y += directionVector.y * actualSpeed;
 }
