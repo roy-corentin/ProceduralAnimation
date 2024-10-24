@@ -88,10 +88,6 @@ fn computeDirectionVector(pointA: rl.Vector2, pointB: rl.Vector2) rl.Vector2 {
     return .{ .x = dx / distance, .y = dy / distance };
 }
 
-fn absoluteValue(number: f32) f32 {
-    return if (number < 0) number * -1 else number;
-}
-
 fn distanceBetween(pointA: rl.Vector2, pointB: rl.Vector2) f32 {
     const dx = pointB.x - pointA.x;
     const dy = pointB.y - pointA.y;
