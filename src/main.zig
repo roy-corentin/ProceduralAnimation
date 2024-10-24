@@ -63,7 +63,8 @@ fn deplaceCircles(circles: []Circle) void {
             continue;
 
         const directionVector = computeDirectionVector(circles[i].position, circles[i - 1].position);
-        updateCirclePosition(&circles[i], directionVector, distance);
+        const speed = computeSpeed(distance);
+        updateCirclePosition(&circles[i], directionVector, speed);
     }
 }
 
@@ -75,7 +76,8 @@ fn deplaceCircleInDirectionOfMouse(circle: *Circle) void {
         return;
 
     const directionVector = computeDirectionVector(circle.position, mousePosition);
-    updateCirclePosition(circle, directionVector, distance);
+    const speed = computeSpeed(distance);
+    updateCirclePosition(circle, directionVector, speed);
 }
 
 fn computeDirectionVector(pointA: rl.Vector2, pointB: rl.Vector2) rl.Vector2 {
@@ -96,14 +98,16 @@ fn distanceBetween(pointA: rl.Vector2, pointB: rl.Vector2) f32 {
     return @sqrt(dx * dx + dy * dy);
 }
 
-fn updateCirclePosition(circle: *Circle, directionVector: rl.Vector2, distance: f32) void {
+fn updateCirclePosition(circle: *Circle, directionVector: rl.Vector2, speed: f32) void {
+    circle.position.x += directionVector.x * speed;
+    circle.position.y += directionVector.y * speed;
+}
+
+fn computeSpeed(distance: f32) f32 {
     const minSpeed = 1.0;
     const maxSpeed = 8.0;
     const speedFactor = 0.1;
 
     const speed = @min(distance * speedFactor, maxSpeed);
-    const actualSpeed = @max(minSpeed, speed);
-
-    circle.position.x += directionVector.x * actualSpeed;
-    circle.position.y += directionVector.y * actualSpeed;
+    return @max(minSpeed, speed);
 }
