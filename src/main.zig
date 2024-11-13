@@ -7,7 +7,7 @@ pub fn main() !void {
     const allocator = std.heap.c_allocator;
     const screenWidth = 1000;
     const screenHeight = 900;
-    const circles = try generateCircles(7);
+    const circles = try createCircles(7, allocator);
     defer allocator.free(circles);
 
     rl.setTargetFPS(60);
@@ -26,8 +26,7 @@ pub fn main() !void {
     }
 }
 
-fn generateCircles(number: usize) ![]Circle {
-    const allocator = std.heap.c_allocator;
+fn createCircles(number: usize, allocator: std.mem.Allocator) ![]Circle {
     var x: f32 = 400.0;
     const y: f32 = 225.0;
     const baseRadius: f32 = 25.0;
@@ -37,17 +36,15 @@ fn generateCircles(number: usize) ![]Circle {
     for (0..number) |i| {
         const source = @min(@as(f32, @floatFromInt(@mod(i, @divFloor(number, 2)))), 1.0);
         const circleRadius = baseRadius + source * 4.0;
-        head[i].position = .{ .x = x, .y = y };
-        head[i].radius = circleRadius;
+        head[i] = .{ .position = .{ .x = x, .y = y }, .radius = circleRadius };
         x -= circleRadius * 2.0;
     }
     return head;
 }
 
 fn drawCircles(circles: []Circle) void {
-    for (circles) |circle| {
+    for (circles) |circle|
         drawCircle(circle);
-    }
 }
 
 fn drawCircle(circle: Circle) void {
