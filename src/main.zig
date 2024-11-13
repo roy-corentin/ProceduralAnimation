@@ -62,7 +62,7 @@ fn deplaceCircles(circles: []Circle) void {
 
 fn deplaceCircleInDirectionOfMouse(circle: *Circle) void {
     const mousePosition = rl.getMousePosition();
-    const distance = distanceBetween(circle.position, mousePosition);
+    const distance = euclideanDistance(circle.position, mousePosition);
     if (distance <= circle.radius)
         return;
 
@@ -70,7 +70,7 @@ fn deplaceCircleInDirectionOfMouse(circle: *Circle) void {
 }
 
 fn deplaceCircleInDirectionOfPoint(circleToMove: *Circle, targetPosition: rl.Vector2, distanceConstraint: f32) void {
-    const distance = distanceBetween(circleToMove.position, targetPosition);
+    const distance = euclideanDistance(circleToMove.position, targetPosition);
     if (distance <= distanceConstraint)
         return;
 
@@ -87,7 +87,7 @@ fn computeDirectionVector(pointA: rl.Vector2, pointB: rl.Vector2) rl.Vector2 {
     return .{ .x = dx / distance, .y = dy / distance };
 }
 
-fn distanceBetween(pointA: rl.Vector2, pointB: rl.Vector2) f32 {
+fn euclideanDistance(pointA: rl.Vector2, pointB: rl.Vector2) f32 {
     const dx = pointB.x - pointA.x;
     const dy = pointB.y - pointA.y;
     return @sqrt(dx * dx + dy * dy);
