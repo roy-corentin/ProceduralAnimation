@@ -22,6 +22,7 @@ pub fn main() !void {
         rl.drawFPS(10, 10);
         drawCircles(circles);
         deplaceCircles(circles);
+        fixUnaturalAngles(circles);
         rl.endDrawing();
     }
 }
@@ -105,4 +106,25 @@ fn computeSpeed(distance: f32) f32 {
 fn updateCirclePosition(circle: *Circle, directionVector: rl.Vector2, speed: f32) void {
     circle.position.x += directionVector.x * speed;
     circle.position.y += directionVector.y * speed;
+}
+
+fn fixUnaturalAngles(circles: []Circle) void {
+    std.debug.print("Start\n", .{});
+    for (0..circles.len - 2) |i| {
+        const angle = computeAngle(circles[i].position, circles[i + 1].position, circles[i + 2].position);
+        std.debug.print("{d} between {d} {d} {d}\n", .{ angle, i, i + 1, i + 2 });
+    }
+    std.debug.print("End\n", .{});
+}
+
+fn computeAngle(c: rl.Vector2, a: rl.Vector2, b: rl.Vector2) f32 {
+    const xu = b.x - a.x;
+    const yu = b.y - a.y;
+    const xv = c.x - a.x;
+    const yv = c.y - a.y;
+    const scalarProduct = xu * xv + yu * yv;
+    const abDistance = euclideanDistance(a, b);
+    const acDistance = euclideanDistance(a, c);
+
+    return std.math.acos(scalarProduct / (abDistance * acDistance));
 }
