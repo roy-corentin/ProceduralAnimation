@@ -126,5 +126,7 @@ fn computeAngle(c: rl.Vector2, a: rl.Vector2, b: rl.Vector2) f32 {
     const abDistance = euclideanDistance(a, b);
     const acDistance = euclideanDistance(a, c);
 
-    return std.math.acos(scalarProduct / (abDistance * acDistance));
+    const angleRadians = std.math.acos(scalarProduct / (abDistance * acDistance));
+
+    return angleRadians * (180.0 / std.math.pi);
 }
