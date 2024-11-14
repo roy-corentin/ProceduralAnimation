@@ -1,7 +1,7 @@
 const std = @import("std");
 const rl = @import("raylib");
 
-const Circle = struct { position: rl.Vector2, radius: f32 };
+const Circle = struct { radius: f32, position: rl.Vector2 };
 
 pub fn main() !void {
     const allocator = std.heap.c_allocator;
@@ -44,8 +44,7 @@ fn createCircles(number: usize, allocator: std.mem.Allocator) ![]Circle {
 }
 
 fn drawCircles(circles: []Circle) void {
-    for (circles) |circle|
-        drawCircle(circle);
+    for (circles) |circle| drawCircle(circle);
 }
 
 fn drawCircle(circle: Circle) void {
@@ -61,13 +60,8 @@ fn deplaceCircles(circles: []Circle) void {
     }
 }
 
-fn deplaceCircleInDirectionOfMouse(circle: *Circle) void {
-    const mousePosition = rl.getMousePosition();
-    const distance = euclideanDistance(circle.position, mousePosition);
-    if (distance <= circle.radius)
-        return;
-
-    updateCirclePosition(circle, computeDirectionVector(circle.position, mousePosition), computeSpeed(distance));
+fn deplaceCircleInDirectionOfMouse(circleToMove: *Circle) void {
+    deplaceCircleInDirectionOfPoint(circleToMove, rl.getMousePosition(), circleToMove.radius);
 }
 
 fn deplaceCircleInDirectionOfPoint(circleToMove: *Circle, targetPosition: rl.Vector2, distanceConstraint: f32) void {
@@ -75,9 +69,7 @@ fn deplaceCircleInDirectionOfPoint(circleToMove: *Circle, targetPosition: rl.Vec
     if (distance <= distanceConstraint)
         return;
 
-    const directionVector = computeDirectionVector(circleToMove.position, targetPosition);
-    const speed = computeSpeed(distance);
-    updateCirclePosition(circleToMove, directionVector, speed);
+    updateCirclePosition(circleToMove, computeDirectionVector(circleToMove.position, targetPosition), computeSpeed(distance));
 }
 
 fn computeDirectionVector(pointA: rl.Vector2, pointB: rl.Vector2) rl.Vector2 {
