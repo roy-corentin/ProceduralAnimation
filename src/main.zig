@@ -76,21 +76,21 @@ fn deplaceCircleInDirectionOfPoint(circleToMove: *Circle, targetPosition: rl.Vec
     updateCirclePosition(circleToMove, directionVector, computeSpeed(distance));
 }
 
-fn computeDirectionVector(pointA: rl.Vector2, pointB: rl.Vector2) rl.Vector2 {
-    const dx = pointB.x - pointA.x;
-    const dy = pointB.y - pointA.y;
+inline fn computeDirectionVector(pa: rl.Vector2, pb: rl.Vector2) rl.Vector2 {
+    const dx = pb.x - pa.x;
+    const dy = pb.y - pa.y;
     const distance = @sqrt(dx * dx + dy * dy);
 
     return .{ .x = dx / distance, .y = dy / distance };
 }
 
-fn euclideanDistance(pointA: rl.Vector2, pointB: rl.Vector2) f32 {
-    const dx = pointB.x - pointA.x;
-    const dy = pointB.y - pointA.y;
+inline fn euclideanDistance(pa: rl.Vector2, pb: rl.Vector2) f32 {
+    const dx = pb.x - pa.x;
+    const dy = pb.y - pa.y;
     return @sqrt(dx * dx + dy * dy);
 }
 
-fn computeSpeed(distance: f32) f32 {
+inline fn computeSpeed(distance: f32) f32 {
     const minSpeed = 1.0;
     const maxSpeed = 8.0;
     const speedFactor = 0.1;
@@ -113,7 +113,7 @@ fn fixUnaturalAngles(circles: []Circle) void {
     std.debug.print("End\n", .{});
 }
 
-fn computeAngle(c: rl.Vector2, a: rl.Vector2, b: rl.Vector2) f32 {
+inline fn computeAngle(c: rl.Vector2, a: rl.Vector2, b: rl.Vector2) f32 {
     const xu = b.x - a.x;
     const yu = b.y - a.y;
     const xv = c.x - a.x;
