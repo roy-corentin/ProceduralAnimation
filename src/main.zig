@@ -93,8 +93,7 @@ inline fn euclideanDistance(pa: rl.Vector2, pb: rl.Vector2) f32 {
 inline fn computeSpeed(distance: f32) f32 {
     const minSpeed = 1.0;
     const maxSpeed = 8.0;
-    const speedFactor = 0.1;
-    const speed = @min(distance * speedFactor, maxSpeed);
+    const speed = @min(distance, maxSpeed);
 
     return @max(minSpeed, speed);
 }
