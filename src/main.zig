@@ -66,8 +66,7 @@ fn deplaceCircleInDirectionOfMouse(circleToMove: *Circle) void {
 
 fn deplaceCircleInDirectionOfPoint(circleToMove: *Circle, targetPosition: rl.Vector2, distanceConstraint: f32) void {
     const distance = euclideanDistance(circleToMove.position, targetPosition);
-    if (distance <= distanceConstraint)
-        return;
+    if (distance >= distanceConstraint - 5 and distance <= distanceConstraint + 5) return;
 
     updateCirclePosition(circleToMove, computeDirectionVector(circleToMove.position, targetPosition), computeSpeed(distance));
 }
