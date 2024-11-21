@@ -68,7 +68,12 @@ fn deplaceCircleInDirectionOfPoint(circleToMove: *Circle, targetPosition: rl.Vec
     const distance = euclideanDistance(circleToMove.position, targetPosition);
     if (distance >= distanceConstraint - 5 and distance <= distanceConstraint + 5) return;
 
-    updateCirclePosition(circleToMove, computeDirectionVector(circleToMove.position, targetPosition), computeSpeed(distance));
+    const directionVector = if (distance > distanceConstraint)
+        computeDirectionVector(circleToMove.position, targetPosition)
+    else
+        computeDirectionVector(targetPosition, circleToMove.position);
+
+    updateCirclePosition(circleToMove, directionVector, computeSpeed(distance));
 }
 
 fn computeDirectionVector(pointA: rl.Vector2, pointB: rl.Vector2) rl.Vector2 {
