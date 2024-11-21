@@ -98,9 +98,8 @@ inline fn computeSpeed(distance: f32) f32 {
     return @max(minSpeed, speed);
 }
 
-fn updateCirclePosition(circle: *Circle, directionVector: rl.Vector2, speed: f32) void {
-    circle.position.x += directionVector.x * speed;
-    circle.position.y += directionVector.y * speed;
+inline fn updateCirclePosition(circle: *Circle, directionVector: rl.Vector2, speed: f32) void {
+    circle.position = rl.Vector2.add(circle.position, rl.Vector2.scale(directionVector, speed));
 }
 
 fn fixUnaturalAngles(circles: []Circle) void {
