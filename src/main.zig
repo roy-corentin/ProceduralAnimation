@@ -1,5 +1,6 @@
 const std = @import("std");
 const rl = @import("raylib");
+const tools = @import("tools.zig");
 
 const Circle = struct { radius: f32, position: rl.Vector2 };
 
@@ -18,19 +19,19 @@ pub fn main() !void {
 
     while (!rl.windowShouldClose()) {
         rl.beginDrawing();
+        defer rl.endDrawing();
         rl.clearBackground(rl.Color.blank);
         rl.drawFPS(10, 10);
         drawCircles(circles);
         deplaceCircles(circles);
         fixUnaturalAngles(circles);
-        rl.endDrawing();
     }
 }
 
 fn createCircles(number: usize, allocator: std.mem.Allocator) ![]Circle {
     var x: f32 = 400.0;
-    const y: f32 = 225.0;
-    const baseRadius: f32 = 25.0;
+    const y = 225.0;
+    const baseRadius = 25.0;
 
     const head = try allocator.alloc(Circle, number);
 
@@ -60,42 +61,20 @@ fn deplaceCircles(circles: []Circle) void {
     }
 }
 
-fn deplaceCircleInDirectionOfMouse(circleToMove: *Circle) void {
-    deplaceCircleInDirectionOfPoint(circleToMove, rl.getMousePosition(), circleToMove.radius);
+fn deplaceCircleInDirectionOfMouse(c: *Circle) void {
+    deplaceCircleInDirectionOfPoint(c, rl.getMousePosition(), c.radius);
 }
 
-fn deplaceCircleInDirectionOfPoint(circleToMove: *Circle, targetPosition: rl.Vector2, distanceConstraint: f32) void {
-    const distance = euclideanDistance(circleToMove.position, targetPosition);
+fn deplaceCircleInDirectionOfPoint(circle: *Circle, target: rl.Vector2, distanceConstraint: f32) void {
+    const distance = rl.Vector2.distance(circle.position, target);
     if (distance >= distanceConstraint - 5 and distance <= distanceConstraint + 5) return;
 
     const directionVector = if (distance > distanceConstraint)
-        computeDirectionVector(circleToMove.position, targetPosition)
+        tools.computeDirectionVector(circle.position, target)
     else
-        computeDirectionVector(targetPosition, circleToMove.position);
+        tools.computeDirectionVector(target, circle.position);
 
-    updateCirclePosition(circleToMove, directionVector, computeSpeed(distance));
-}
-
-inline fn computeDirectionVector(pa: rl.Vector2, pb: rl.Vector2) rl.Vector2 {
-    const dx = pb.x - pa.x;
-    const dy = pb.y - pa.y;
-    const distance = @sqrt(dx * dx + dy * dy);
-
-    return .{ .x = dx / distance, .y = dy / distance };
-}
-
-inline fn euclideanDistance(pa: rl.Vector2, pb: rl.Vector2) f32 {
-    const dx = pb.x - pa.x;
-    const dy = pb.y - pa.y;
-    return @sqrt(dx * dx + dy * dy);
-}
-
-inline fn computeSpeed(distance: f32) f32 {
-    const minSpeed = 1.0;
-    const maxSpeed = 8.0;
-    const speed = @min(distance, maxSpeed);
-
-    return @max(minSpeed, speed);
+    updateCirclePosition(circle, directionVector, tools.computeSpeed(distance));
 }
 
 inline fn updateCirclePosition(circle: *Circle, directionVector: rl.Vector2, speed: f32) void {
@@ -105,22 +84,8 @@ inline fn updateCirclePosition(circle: *Circle, directionVector: rl.Vector2, spe
 fn fixUnaturalAngles(circles: []Circle) void {
     std.debug.print("Start\n", .{});
     for (0..circles.len - 2) |i| {
-        const angle = computeAngle(circles[i].position, circles[i + 1].position, circles[i + 2].position);
+        const angle = tools.computeAngle(circles[i].position, circles[i + 1].position, circles[i + 2].position);
         std.debug.print("{d} between {d} {d} {d}\n", .{ angle, i, i + 1, i + 2 });
     }
     std.debug.print("End\n", .{});
-}
-
-inline fn computeAngle(c: rl.Vector2, a: rl.Vector2, b: rl.Vector2) f32 {
-    const xu = b.x - a.x;
-    const yu = b.y - a.y;
-    const xv = c.x - a.x;
-    const yv = c.y - a.y;
-    const scalarProduct = xu * xv + yu * yv;
-    const abDistance = euclideanDistance(a, b);
-    const acDistance = euclideanDistance(a, c);
-
-    const angleRadians = std.math.acos(scalarProduct / (abDistance * acDistance));
-
-    return angleRadians * (180.0 / std.math.pi);
 }
