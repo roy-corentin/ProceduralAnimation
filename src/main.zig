@@ -2,10 +2,14 @@ const std = @import("std");
 const rl = @import("raylib");
 const tools = @import("tools.zig");
 
+const CommandType = enum { circle };
+
+const Command = struct { type: CommandType, position: rl.Vector2, radius: f32 };
+
 const Circle = struct { radius: f32, position: rl.Vector2 };
 
 pub fn main() !void {
-    const allocator = std.heap.c_allocator;
+    const allocator = std.heap.page_allocator;
     const screenWidth = 1000;
     const screenHeight = 900;
     const circles = try createCircles(7, allocator);
@@ -22,10 +26,18 @@ pub fn main() !void {
         defer rl.endDrawing();
         rl.clearBackground(rl.Color.blank);
         rl.drawFPS(10, 10);
-        drawCircles(circles);
         deplaceCircles(circles);
-        fixUnaturalAngles(circles);
+        const commands: []Command = try getCircleCommands(circles, allocator);
+        drawCommands(commands);
     }
+}
+
+fn getCircleCommands(circles: []Circle, allocator: std.mem.Allocator) ![]Command {
+    const head = try allocator.alloc(Command, circles.len);
+    for (0..circles.len) |i| {
+        head[i] = .{ .type = CommandType.circle, .position = circles[i].position, .radius = circles[i].radius };
+    }
+    return head;
 }
 
 fn createCircles(number: usize, allocator: std.mem.Allocator) ![]Circle {
@@ -44,12 +56,13 @@ fn createCircles(number: usize, allocator: std.mem.Allocator) ![]Circle {
     return head;
 }
 
-fn drawCircles(circles: []Circle) void {
-    for (circles) |circle| drawCircle(circle);
+fn drawCommands(commands: []Command) void {
+    for (commands) |command| drawCommand(&command);
 }
 
-fn drawCircle(circle: Circle) void {
-    rl.drawCircleLinesV(circle.position, circle.radius, rl.Color.red);
+fn drawCommand(command: *const Command) void {
+    if (command.type == CommandType.circle)
+        rl.drawCircleLinesV(command.position, command.radius, rl.Color.red);
 }
 
 fn deplaceCircles(circles: []Circle) void {
@@ -59,6 +72,7 @@ fn deplaceCircles(circles: []Circle) void {
         const distantConstraint = circles[i].radius + circles[i - 1].radius;
         deplaceCircleInDirectionOfPoint(&circles[i], circles[i - 1].position, distantConstraint);
     }
+    fixUnaturalAngles(circles);
 }
 
 fn deplaceCircleInDirectionOfMouse(c: *Circle) void {
