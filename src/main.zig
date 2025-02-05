@@ -28,6 +28,7 @@ pub fn main() !void {
         rl.drawFPS(10, 10);
         deplaceCircles(circles);
         const commands: []Command = try getCircleCommands(circles, allocator);
+        defer allocator.free(commands);
         drawCommands(commands);
     }
 }
