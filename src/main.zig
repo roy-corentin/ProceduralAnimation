@@ -8,12 +8,13 @@ const Command = struct { type: CommandType, position: rl.Vector2, radius: f32 };
 
 const Circle = struct { radius: f32, position: rl.Vector2 };
 
+const Snake = struct { body: [7]Circle };
+
 pub fn main() !void {
     const allocator = std.heap.page_allocator;
     const screenWidth = 1000;
     const screenHeight = 900;
-    const circles = try createCircles(7, allocator);
-    defer allocator.free(circles);
+    var snake = createSnake();
 
     rl.setTargetFPS(60);
     rl.setConfigFlags(rl.ConfigFlags{ .window_resizable = true });
@@ -26,38 +27,38 @@ pub fn main() !void {
         defer rl.endDrawing();
         rl.clearBackground(rl.Color.blank);
         rl.drawFPS(10, 10);
-        deplaceCircles(circles);
-        const commands: []Command = try getCircleCommands(circles, allocator);
+        deplaceSnake(&snake);
+        const commands: []Command = try getSnakeCommands(&snake, allocator);
         defer allocator.free(commands);
         drawCommands(commands);
     }
 }
 
-fn getCircleCommands(circles: []Circle, allocator: std.mem.Allocator) ![]Command {
-    const head = try allocator.alloc(Command, circles.len);
-    for (0..circles.len) |i| {
-        head[i] = .{ .type = CommandType.circle, .position = circles[i].position, .radius = circles[i].radius };
+fn getSnakeCommands(snake: *const Snake, allocator: std.mem.Allocator) ![]Command {
+    const head = try allocator.alloc(Command, snake.body.len);
+    for (0..snake.body.len) |i| {
+        head[i] = .{ .type = CommandType.circle, .position = snake.body[i].position, .radius = snake.body[i].radius };
     }
     return head;
 }
 
-fn createCircles(number: usize, allocator: std.mem.Allocator) ![]Circle {
-    var x: f32 = 400.0;
-    const y = 225.0;
-    const baseRadius = 25.0;
+fn createSnake() Snake {
+    const snake = Snake{
+        .body = [7]Circle{
+            .{ .radius = 25.0, .position = rl.Vector2{ .x = 400, .y = 225 } },
+            .{ .radius = 25.0, .position = rl.Vector2{ .x = 350, .y = 225 } },
+            .{ .radius = 25.0, .position = rl.Vector2{ .x = 300, .y = 225 } },
+            .{ .radius = 25.0, .position = rl.Vector2{ .x = 250, .y = 225 } },
+            .{ .radius = 25.0, .position = rl.Vector2{ .x = 200, .y = 225 } },
+            .{ .radius = 25.0, .position = rl.Vector2{ .x = 150, .y = 225 } },
+            .{ .radius = 25.0, .position = rl.Vector2{ .x = 100, .y = 225 } },
+        },
+    };
 
-    const head = try allocator.alloc(Circle, number);
-
-    for (0..number) |i| {
-        const source = @min(@as(f32, @floatFromInt(@mod(i, @divFloor(number, 2)))), 1.0);
-        const circleRadius = baseRadius + source * 4.0;
-        head[i] = .{ .position = .{ .x = x, .y = y }, .radius = circleRadius };
-        x -= circleRadius * 2.0;
-    }
-    return head;
+    return snake;
 }
 
-fn drawCommands(commands: []Command) void {
+fn drawCommands(commands: []const Command) void {
     for (commands) |command| drawCommand(&command);
 }
 
@@ -66,14 +67,14 @@ fn drawCommand(command: *const Command) void {
         rl.drawCircleLinesV(command.position, command.radius, rl.Color.red);
 }
 
-fn deplaceCircles(circles: []Circle) void {
-    deplaceCircleInDirectionOfMouse(&circles[0]);
+fn deplaceSnake(snake: *Snake) void {
+    deplaceCircleInDirectionOfMouse(&snake.body[0]);
 
-    for (1..circles.len) |i| {
-        const distantConstraint = circles[i].radius + circles[i - 1].radius;
-        deplaceCircleInDirectionOfPoint(&circles[i], circles[i - 1].position, distantConstraint);
+    for (1..snake.body.len) |i| {
+        const distantConstraint = snake.body[i].radius + snake.body[i - 1].radius;
+        deplaceCircleInDirectionOfPoint(&snake.body[i], snake.body[i - 1].position, distantConstraint);
     }
-    fixUnaturalAngles(circles);
+    fixUnaturalAngles(snake);
 }
 
 fn deplaceCircleInDirectionOfMouse(c: *Circle) void {
@@ -96,10 +97,10 @@ inline fn updateCirclePosition(circle: *Circle, directionVector: rl.Vector2, spe
     circle.position = rl.Vector2.add(circle.position, rl.Vector2.scale(directionVector, speed));
 }
 
-fn fixUnaturalAngles(circles: []Circle) void {
+fn fixUnaturalAngles(snake: *Snake) void {
     std.debug.print("Start\n", .{});
-    for (0..circles.len - 2) |i| {
-        const angle = tools.computeAngle(circles[i].position, circles[i + 1].position, circles[i + 2].position);
+    for (0..snake.body.len - 2) |i| {
+        const angle = tools.computeAngle(snake.body[i].position, snake.body[i + 1].position, snake.body[i + 2].position);
         std.debug.print("{d} between {d} {d} {d}\n", .{ angle, i, i + 1, i + 2 });
     }
     std.debug.print("End\n", .{});
