@@ -29,8 +29,9 @@ pub fn generateCommand(s: *const Snake, allocator: std.mem.Allocator) ![]Command
     const head = try allocator.alloc(Command, s.body.len * 2);
     var i: u16 = 0;
     for (s.body) |body| {
-        head[i] = .{ .type = CommandType.circle, .position = body.position, .radius = body.radius, .angle = body.angle };
-        head[i + 1] = .{ .type = CommandType.line, .position = body.position, .radius = body.radius, .angle = body.angle };
+        head[i] = .{ .circle = .{ .position = body.position, .radius = body.radius, .angle = body.angle } };
+        const spine_point = rl.Vector2{ .x = body.position.x + body.radius * std.math.cos(body.angle), .y = body.position.y + body.radius * std.math.sin(body.angle) };
+        head[i + 1] = .{ .line = .{ .point1 = body.position, .point2 = spine_point } };
         i = i + 2;
     }
     return head;

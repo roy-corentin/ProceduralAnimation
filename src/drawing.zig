@@ -6,19 +6,24 @@ const targetFPS = 60;
 
 pub const CommandType = enum { circle, line };
 
-pub const Command = struct {
-    type: CommandType,
-    position: rl.Vector2,
-    radius: f32,
-    angle: f32,
+pub const Command = union(CommandType) {
+    circle: struct {
+        position: rl.Vector2,
+        radius: f32,
+        angle: f32,
+    },
+    line: struct {
+        point1: rl.Vector2,
+        point2: rl.Vector2,
+    },
 
     pub fn draw(command: *const Command) void {
-        switch (command.type) {
-            CommandType.circle => {
-                rl.drawCircleLinesV(command.position, command.radius, rl.Color.red);
+        switch (command.*) {
+            .circle => |circle| {
+                rl.drawCircleLinesV(circle.position, circle.radius, rl.Color.red);
             },
-            CommandType.line => {
-                rl.drawLineV(command.position, rl.Vector2{ .x = command.position.x + command.radius * std.math.cos(command.angle), .y = command.position.y + command.radius * std.math.sin(command.angle) }, rl.Color.red);
+            .line => |line| {
+                rl.drawLineV(line.point1, line.point2, rl.Color.red);
             },
         }
     }
