@@ -26,15 +26,16 @@ pub fn init() Snake {
 }
 
 pub fn generateCommand(s: *const Snake, allocator: std.mem.Allocator) ![]Command {
-    const head = try allocator.alloc(Command, s.body.len * 2);
+    const result = try allocator.alloc(Command, s.body.len * 2);
     var i: u16 = 0;
     for (s.body) |body| {
-        head[i] = .{ .circle = .{ .position = body.position, .radius = body.radius, .angle = body.angle } };
         const spine_point = rl.Vector2{ .x = body.position.x + body.radius * std.math.cos(body.angle), .y = body.position.y + body.radius * std.math.sin(body.angle) };
-        head[i + 1] = .{ .line = .{ .point1 = body.position, .point2 = spine_point } };
+
+        result[i] = .{ .circle = .{ .position = body.position, .radius = body.radius, .angle = body.angle } };
+        result[i + 1] = .{ .line = .{ .point1 = body.position, .point2 = spine_point } };
         i = i + 2;
     }
-    return head;
+    return result;
 }
 
 pub fn move(s: *Snake) void {
