@@ -1,5 +1,6 @@
 const std = @import("std");
 const rl = @import("raylib");
+const Circle = @import("drawing.zig").Circle;
 
 pub export fn computeDirectionVector(pa: rl.Vector2, pb: rl.Vector2) rl.Vector2 {
     const dx = pb.x - pa.x;
@@ -53,4 +54,13 @@ fn i32ToString(number: i32) ![:0]const u8 {
 
     std.debug.print("String: {s}, FPS: {d}\n", .{ string, number });
     return string;
+}
+
+pub fn computeCircleLine(circle: *const Circle, angle: u32) rl.Vector4 {
+    const x1 = circle.position.x + circle.radius * std.math.cos(angle - 0.5 * std.math.pi);
+    const y1 = circle.position.y + circle.radius * std.math.sin(angle - 0.5 * std.math.pi);
+    const x2 = circle.position.x + circle.radius * std.math.cos(angle + 0.5 * std.math.pi);
+    const y2 = circle.position.y + circle.radius * std.math.sin(angle + 0.5 * std.math.pi);
+
+    return .{ .x = x1, .y = y1, .z = x2, .w = y2 };
 }
