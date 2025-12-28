@@ -2,7 +2,7 @@ const std = @import("std");
 const rl = @import("raylib");
 const tools = @import("tools.zig");
 
-const targetFPS = 60;
+const targetFPS = 120;
 
 pub const CommandType = enum { circle, line };
 
@@ -48,7 +48,7 @@ pub const Circle = struct {
         else
             tools.computeDirectionVector(target, circle.position);
 
-        updateCirclePosition(circle, directionVector, tools.computeSpeed(distance));
+        updateCirclePosition(circle, directionVector, tools.computeFrameSpeed());
         updateCircleAngle(circle, target);
     }
 

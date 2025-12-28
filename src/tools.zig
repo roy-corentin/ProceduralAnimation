@@ -10,12 +10,11 @@ pub export fn computeDirectionVector(pa: rl.Vector2, pb: rl.Vector2) rl.Vector2 
     return .{ .x = dx / distance, .y = dy / distance };
 }
 
-pub export fn computeSpeed(distance: f32) f32 {
-    const minSpeed = 1.0;
-    const maxSpeed = 8.0;
-    const speed = @min(distance, maxSpeed);
+pub export fn computeFrameSpeed() f32 {
+    const pixelPerSeconds = 400;
+    const deltaTime = rl.getFrameTime();
 
-    return @max(minSpeed, speed);
+    return pixelPerSeconds * deltaTime;
 }
 
 pub export fn computeAngle(c: rl.Vector2, a: rl.Vector2, b: rl.Vector2) f32 {
