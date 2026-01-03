@@ -26,14 +26,33 @@ pub fn init() Snake {
 }
 
 pub fn generateCommand(s: *const Snake, allocator: std.mem.Allocator) ![]Command {
-    const result = try allocator.alloc(Command, s.body.len * 2);
-    var i: u16 = 0;
-    for (s.body) |body| {
-        const spine_point = rl.Vector2{ .x = body.position.x + body.radius * std.math.cos(body.angle), .y = body.position.y + body.radius * std.math.sin(body.angle) };
+    const nb_command_by_body_part = 3;
+    const result = try allocator.alloc(Command, (s.body.len - 1) * nb_command_by_body_part + 1);
+    var j: u8 = 1;
+    result[0] = .{ .arc = .{ .position = s.body[0].position, .radius = s.body[0].radius, .angle = s.body[0].angle } };
+    for (0..s.body.len - 1) |i| {
+        const b1 = s.body[i];
+        const b2 = s.body[i + 1];
+        const spine_point = rl.Vector2{ .x = b1.position.x + b1.radius * std.math.cos(b1.angle), .y = b1.position.y + b1.radius * std.math.sin(b1.angle) };
 
-        result[i] = .{ .circle = .{ .position = body.position, .radius = body.radius, .angle = body.angle } };
-        result[i + 1] = .{ .line = .{ .point1 = body.position, .point2 = spine_point } };
-        i = i + 2;
+        const l_x1 = b1.position.x + b1.radius * @cos(b1.angle - 0.5 * std.math.pi);
+        const l_y1 = b1.position.y + b1.radius * @sin(b1.angle - 0.5 * std.math.pi);
+        const l_x2 = b2.position.x + b2.radius * @cos(b2.angle - 0.5 * std.math.pi);
+        const l_y2 = b2.position.y + b2.radius * @sin(b2.angle - 0.5 * std.math.pi);
+        const l_point_b1 = rl.Vector2{ .x = l_x1, .y = l_y1 };
+        const l_point_b2 = rl.Vector2{ .x = l_x2, .y = l_y2 };
+
+        const r_x1 = b1.position.x + b1.radius * @cos(b1.angle + 0.5 * std.math.pi);
+        const r_y1 = b1.position.y + b1.radius * @sin(b1.angle + 0.5 * std.math.pi);
+        const r_x2 = b2.position.x + b2.radius * @cos(b2.angle + 0.5 * std.math.pi);
+        const r_y2 = b2.position.y + b2.radius * @sin(b2.angle + 0.5 * std.math.pi);
+        const r_point_b1 = rl.Vector2{ .x = r_x1, .y = r_y1 };
+        const r_point_b2 = rl.Vector2{ .x = r_x2, .y = r_y2 };
+
+        result[j] = .{ .line = .{ .point1 = l_point_b1, .point2 = l_point_b2 } };
+        result[j + 1] = .{ .line = .{ .point1 = r_point_b1, .point2 = r_point_b2 } };
+        result[j + 2] = .{ .line = .{ .point1 = b1.position, .point2 = spine_point } };
+        j += nb_command_by_body_part;
     }
     return result;
 }

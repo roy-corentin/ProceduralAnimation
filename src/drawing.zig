@@ -4,10 +4,15 @@ const tools = @import("tools.zig");
 
 const targetFPS = 120;
 
-pub const CommandType = enum { circle, line };
+pub const CommandType = enum { circle, arc, line };
 
 pub const Command = union(CommandType) {
     circle: struct {
+        position: rl.Vector2,
+        radius: f32,
+        angle: f32,
+    },
+    arc: struct {
         position: rl.Vector2,
         radius: f32,
         angle: f32,
@@ -19,6 +24,9 @@ pub const Command = union(CommandType) {
 
     pub fn draw(command: *const Command) void {
         switch (command.*) {
+            .arc => |arc| {
+                rl.drawCircleSectorLines(arc.position, arc.radius, arc.angle * (180.0 / std.math.pi) - 90.0, arc.angle * (180.0 / std.math.pi) + 90.0, 20, rl.Color.red);
+            },
             .circle => |circle| {
                 rl.drawCircleLinesV(circle.position, circle.radius, rl.Color.red);
             },
