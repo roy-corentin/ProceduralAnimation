@@ -1,6 +1,7 @@
 pub const Snake = @This();
 const std = @import("std");
 const rl = @import("raylib");
+const tools = @import("tools.zig");
 const drawing = @import("drawing.zig");
 const Circle = drawing.Circle;
 const Command = drawing.Command;
@@ -58,10 +59,52 @@ pub fn generateCommand(s: *const Snake, allocator: std.mem.Allocator) ![]Command
 }
 
 pub fn move(s: *Snake) void {
-    s.body[0].deplaceCircleInDirectionOfMouse();
+    s.move_head();
 
     inline for (1..s.body.len) |i| {
         const prev_position = s.body[i - 1].position;
-        s.body[i].deplaceCircleInDirectionOfPoint(prev_position);
+        move_body_part(&s.body[i], prev_position);
     }
+}
+
+fn move_head(s: *Snake) void {
+    const head = &s.body[0];
+
+    // Update head angle
+    const target = rl.getMousePosition();
+    const a = std.math.atan2(target.y - head.position.y, target.x - head.position.x);
+    var delta = a - head.angle;
+    while (delta < std.math.pi * -1) {
+        delta += 2 * std.math.pi;
+    }
+    while (delta > std.math.pi) {
+        delta -= 2 * std.math.pi;
+    }
+    head.angle += 0.05 * delta;
+
+    // Move head
+    const distanceConstraint = head.radius;
+    const distance = rl.Vector2.distance(head.position, target);
+    if (distance <= distanceConstraint + 5) return;
+
+    const directionVector = tools.computeDirectionVectorByAngle(head.angle);
+    tools.updateCirclePosition(head, directionVector, tools.computeFrameSpeed());
+}
+
+fn move_body_part(body_part: *Circle, target: rl.Vector2) void {
+
+    // Update body_part angle
+    body_part.angle = std.math.atan2(target.y - body_part.position.y, target.x - body_part.position.x);
+
+    // Move body_part
+    const distanceConstraint = body_part.radius;
+    const distance = rl.Vector2.distance(body_part.position, target);
+    if (distance <= distanceConstraint + 5) return;
+
+    const directionVector = if (distance > distanceConstraint)
+        tools.computeDirectionVector(body_part.position, target)
+    else
+        tools.computeDirectionVector(target, body_part.position);
+
+    tools.updateCirclePosition(body_part, directionVector, tools.computeFrameSpeed());
 }

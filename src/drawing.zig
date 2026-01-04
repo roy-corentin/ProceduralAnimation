@@ -1,6 +1,5 @@
 const std = @import("std");
 const rl = @import("raylib");
-const tools = @import("tools.zig");
 
 const targetFPS = 120;
 
@@ -41,32 +40,6 @@ pub const Circle = struct {
     radius: f32,
     position: rl.Vector2,
     angle: f32,
-
-    pub fn deplaceCircleInDirectionOfMouse(c: *Circle) void {
-        deplaceCircleInDirectionOfPoint(c, rl.getMousePosition());
-    }
-
-    pub fn deplaceCircleInDirectionOfPoint(circle: *Circle, target: rl.Vector2) void {
-        const distanceConstraint = circle.radius;
-        const distance = rl.Vector2.distance(circle.position, target);
-        if (distance >= distanceConstraint - 5 and distance <= distanceConstraint + 5) return;
-
-        const directionVector = if (distance > distanceConstraint)
-            tools.computeDirectionVector(circle.position, target)
-        else
-            tools.computeDirectionVector(target, circle.position);
-
-        updateCirclePosition(circle, directionVector, tools.computeFrameSpeed());
-        updateCircleAngle(circle, target);
-    }
-
-    pub fn updateCirclePosition(circle: *Circle, directionVector: rl.Vector2, speed: f32) void {
-        circle.position = rl.Vector2.add(circle.position, rl.Vector2.scale(directionVector, speed));
-    }
-
-    pub fn updateCircleAngle(circle: *Circle, target: rl.Vector2) void {
-        circle.angle = std.math.atan2(target.y - circle.position.y, target.x - circle.position.x);
-    }
 };
 
 pub fn drawCommands(commands: []const Command) void {
