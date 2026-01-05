@@ -7,7 +7,7 @@ const Circle = drawing.Circle;
 const Command = drawing.Command;
 const CommandType = drawing.CommandType;
 
-const SnakeLen = 15;
+const SnakeLen = 30;
 body: [SnakeLen]Circle,
 
 pub fn init() Snake {
@@ -16,8 +16,8 @@ pub fn init() Snake {
     var body: [SnakeLen]Circle = undefined;
 
     inline for (0..SnakeLen) |i| {
-        const r = r1 - @as(f32, @floatFromInt(i)) * (r1 / @as(f32, @floatFromInt(SnakeLen - 1)));
-        x = x - r;
+        const r = r1 - (@as(f32, @floatFromInt(i)) * (r1 / @as(f32, @floatFromInt(SnakeLen - 1))));
+        x -= r;
         body[i] = .{ .radius = r, .position = rl.Vector2{ .x = x, .y = 225 }, .angle = 0 };
     }
 
@@ -92,19 +92,15 @@ fn move_head(s: *Snake) void {
 }
 
 fn move_body_part(body_part: *Circle, target: rl.Vector2) void {
+    const distanceConstraint = body_part.radius;
+    const distance = rl.Vector2.distance(body_part.position, target);
+
+    if (distance <= distanceConstraint) return;
 
     // Update body_part angle
     body_part.angle = std.math.atan2(target.y - body_part.position.y, target.x - body_part.position.x);
 
     // Move body_part
-    const distanceConstraint = body_part.radius;
-    const distance = rl.Vector2.distance(body_part.position, target);
-    if (distance <= distanceConstraint + 5) return;
-
-    const directionVector = if (distance > distanceConstraint)
-        tools.computeDirectionVector(body_part.position, target)
-    else
-        tools.computeDirectionVector(target, body_part.position);
-
+    const directionVector = tools.computeDirectionVector(body_part.position, target);
     tools.updateCirclePosition(body_part, directionVector, tools.computeFrameSpeed());
 }
