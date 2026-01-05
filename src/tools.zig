@@ -10,6 +10,14 @@ pub export fn computeDirectionVector(pa: rl.Vector2, pb: rl.Vector2) rl.Vector2 
     return .{ .x = dx / distance, .y = dy / distance };
 }
 
+pub export fn computeDirectionVectorByAngle(angle: f32) rl.Vector2 {
+    return .{ .x = std.math.cos(angle), .y = std.math.sin(angle) };
+}
+
+pub export fn updateCirclePosition(circle: *Circle, directionVector: rl.Vector2, speed: f32) void {
+    circle.position = rl.Vector2.add(circle.position, rl.Vector2.scale(directionVector, speed));
+}
+
 pub export fn computeFrameSpeed() f32 {
     const pixelPerSeconds = 400;
     const deltaTime = rl.getFrameTime();
