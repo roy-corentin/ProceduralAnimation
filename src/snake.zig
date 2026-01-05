@@ -69,9 +69,13 @@ pub fn move(s: *Snake) void {
 
 fn move_head(s: *Snake) void {
     const head = &s.body[0];
+    const target = rl.getMousePosition();
+    const distanceConstraint = head.radius + 5;
+
+    const distance = rl.Vector2.distance(head.position, target);
+    if (distance <= distanceConstraint) return;
 
     // Update head angle
-    const target = rl.getMousePosition();
     const a = std.math.atan2(target.y - head.position.y, target.x - head.position.x);
     var delta = a - head.angle;
     while (delta < std.math.pi * -1) {
@@ -83,10 +87,6 @@ fn move_head(s: *Snake) void {
     head.angle += 0.05 * delta;
 
     // Move head
-    const distanceConstraint = head.radius;
-    const distance = rl.Vector2.distance(head.position, target);
-    if (distance <= distanceConstraint + 5) return;
-
     const directionVector = tools.computeDirectionVectorByAngle(head.angle);
     tools.updateCirclePosition(head, directionVector, tools.computeFrameSpeed());
 }
