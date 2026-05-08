@@ -1,6 +1,7 @@
 const std = @import("std");
 const rl = @import("raylib");
-const Circle = @import("drawing.zig").Circle;
+const drawing = @import("drawing.zig");
+const Circle = drawing.Circle;
 
 pub export fn computeDirectionVector(pa: rl.Vector2, pb: rl.Vector2) rl.Vector2 {
     const dx = pb.x - pa.x;
